@@ -59,7 +59,7 @@ void catch_sigusr(int sig_num)
 	}
 	else
 	{
-		puts("what ? ")
+		puts("what ? ");
 	}
 }
 
@@ -73,7 +73,6 @@ void catch_sigterm(int sig_num)
 
 //-------------------------------------
 void do_child()
-void do_child()
 {
 	action(getppid());
 }
@@ -84,6 +83,7 @@ void do_parent(pid_t child_id)
 		action(child_id);
 }
 
+//-------------------------------------
 void action( p_id process_to_kill)
 {
 	int option, s_usr1, s_usr2;
@@ -117,7 +117,7 @@ void action( p_id process_to_kill)
 		{
 			puts("process %d surrender", getpid());
 			kill(process_to_kill, SIGTERM);
-			exit(EXIT_SUCCESS)
+			exit(EXIT_SUCCESS);
 		}
 	}
 }
