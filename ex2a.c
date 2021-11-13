@@ -1,85 +1,117 @@
+/*
+- parent creates child process
+- child runs in infinite loop
+	- in each loop: child magril number
+	- when he randomizes 100 thousand prime numbers, he stops
+	- numbers are not saved or presented
+- if the child process finishes in less than 1 second, the parent prints 1
+- if the child process finishes in more than 1 but less than 2, parent prints 2
+- if the child process finishes in more than 2, the parent prints 0
+*/
+
+
+//------------ inclide section ----------------
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
 #include <unistd.j> // for fork()
 #include <signal.h>
 
+//--------------- const section --------------
 const int NUM_OF_LOOPS = 100000;
+
+//----------- prototype section --------------
+void catch_alarm(int sig_num);
+void catch_sigusr1(int sig_num);
+bool prime_num(int num);
+void do_child();
+void do_parent();
+void print_error_and_exit();
+
+//----------- global variables ---------------
 short time_elapsed;
 
+//-------------- main section ----------------
 int main()
 {
-	/*
-	- parent creates child process
-	- child runs in infinite loop
-		- in each loop: child magril number
-		- when he randomizes 100 thousand prime numbers, he stops
-		- numbers are not saved or presented
-	- if the child process finishes in less than 1 second, the parent prints 1
-	- if the child process finishes in more than 1 but less than 2, parent prints 2
-	- if the child process finishes in more than 2, the parent prints 0
-	*/
 	pid_t status;
 
+	// signal handlers declaration
 	signal(SIGALRM, catch_alarm);
 	signal(SIGUSR1, catch_sigusr1);
 
-	time_elapsed = 1;
-	status = fork();
+	time_elapsed = 1; //reset to 1
+	status = fork(); //create proccess
 
-	if(status < 0)
+	if(status < 0) // handle error in fork
 		print_error_and_exit();
-	if (status == 0)
+	if (status == 0) //child
 		do_child();
-	else 
+	else //parent
 		do_parent();
 
 	return EXIT_SUCCESS;
 }
 
+//--------------------------------------------
 void catch_alarm(int sig_num)
+void catch;
+alarm(int sig_num)
 {
 	signal(SIGALRM, catch_alarm); //dont need this in linux im pretty sure but ok
-	if(time_elapsed == 1) //does this change the global value for the child too??
-		time_elapsed = 2;
-	else
-		time_elapsed = 0;
+ 	time_elapsed = (time_elapsed == 1) ? 2 :  0;
+	// if(time_elapsed == 1) //does this change the global value for the child too??
+	// 	time_elapsed = 2;
+	// else
+	// 	time_elapsed = 0;
 }
 
+//--------------------------------------------
 void catch_sigusr1(int sig_num)
 {
 	signal(SIGUSR1, catch_sigusr1);
-	puts("%d\n", screensaver);
+	puts("%d\n", time_elapsed);
 	wait(); //does parent need to wait for child to end? will child be ok? babysitter? the answer is yes
 	exit(EXIT_SUCCESS);
 }
 
+//--------------------------------------------
 bool prime_num(int num)
 {
 	int i;
-	for(i = 2, i*i < num; i++)
+	for(i = 2, i*i < num; i
+	{
 		if(num % i == 0)
 			return false;
-
+	}
 	return true;
 }
 
+//--------------------------------------------
 void do_child()
 {
-	int num, num_of_primes = 0;
+	int num, //random num
+	 		num_of_primes = 0; //primes counter
 	srand(17);
 
-	while(num_of_primes < NUM_OF_LOOPS)
+	while(1)
 	{
 		num = rand();
 		if(prime_num(num))
 			num_of_primes++;
+
+		if (num_of_primes == NUM_OF_LOOPS)
+		{
+			kill(getppid(), SIGUSR1);
+			exit(EXIT_SUCCESS);
+		}
 	}
-	kill(getppid(), SIGUSR1);
-	exit(EXIT_SUCCESS);
 }
 
+//--------------------------------------------
 void do_parent()
+void do_pa;
+ent()
 {
 	for(i = 0; i < 2; i++)
 	{
@@ -91,6 +123,7 @@ void do_parent()
 	puts("%d", time_elapsed);
 }
 
+//--------------------------------------------
 void print_error_and_exit()
 {
 	fputs("Unable to fork.\n", stderr);
@@ -118,7 +151,7 @@ int main()
 
 	if (status == 0)
 	{
-		
+
 		while(num_of_primes < NUM_OF_LOOPS)
 		{
 			num = rand();
@@ -169,7 +202,7 @@ int main()
 
 	if (status == 0)
 	{
-		
+
 		while(num_of_primes < NUM_OF_LOOPS)
 		{
 			num = rand();
