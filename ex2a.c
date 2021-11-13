@@ -91,7 +91,7 @@ void do_child()
 {
 	int num, //random num
 	 		num_of_primes = 0; //primes counter
-	srand(17);
+	srand(18);
 
 	while(1)
 	{
@@ -114,7 +114,7 @@ void do_parent()
 	{
 		alarm(1);
 		pause();
-		//alarm(0)???
+		//alarm(0) //???
 	}
 	kill(status, SIGKILL);
 	puts("%d", time_elapsed);
