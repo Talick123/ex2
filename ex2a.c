@@ -55,8 +55,6 @@ int main()
 
 //--------------------------------------------
 void catch_alarm(int sig_num)
-void catch;
-alarm(int sig_num)
 {
 	signal(SIGALRM, catch_alarm); //dont need this in linux im pretty sure but ok
  	time_elapsed = (time_elapsed == 1) ? 2 :  0;
@@ -79,11 +77,12 @@ void catch_sigusr1(int sig_num)
 bool prime_num(int num)
 {
 	int i;
-	for(i = 2, i*i < num; i
+	for(i = 2, i*i < num; i++)
 	{
 		if(num % i == 0)
 			return false;
 	}
+
 	return true;
 }
 
@@ -110,8 +109,6 @@ void do_child()
 
 //--------------------------------------------
 void do_parent()
-void do_pa;
-ent()
 {
 	for(i = 0; i < 2; i++)
 	{
