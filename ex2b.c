@@ -47,7 +47,7 @@ void catch_sigusr(int sig_num)
 	//strsignal get sig_num return signal name
 	char *name = strsignal(sig_num); //not sure if its realy work
 
-	puts("Process %d got singal %s", getpid(), strsignal(sig_num));
+	puts("Process %d got signal %s", getpid(), strsignal(sig_num));
 
 	if(name == "SIGUSR1")
 	{
