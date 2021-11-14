@@ -1,4 +1,7 @@
+
+
 //------------ inclide section ----------------
+
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
@@ -7,11 +10,12 @@
 #include<sys/wait.h> //for wait()
 
 //----------- prototype section --------------
+
 void catch_sigusr(int sig_num);
 void catch_sigterm(int sig_num);
 void do_child();
 void do_parent(pid_t child_id);
-void process_action(pid_t process_to_kill);
+void process_action(pid_t process_to_kill, int n_seed);
 void print_error_and_exit();
 
 //----------- global variables ---------------
@@ -45,33 +49,27 @@ int main()
 }
 
 //-------------------------------------
+//signal handler
 void catch_sigusr(int sig_num)
 {
 	signal(SIGUSR1, catch_sigusr);
 	signal(SIGUSR2, catch_sigusr);
-	//strsignal get sig_num return signal name
 
-	// - TODO : change
-
-	//char *name = strsignal(sig_num); //not sure if its realy work
-
-	printf("Process %d got singal %s\n", getpid(), sig_num == S_SIGUSR1 ? "SIGUSR1" : "SIGUSR2");
+	printf("Process %d got signal %s\n", getpid(), sig_num == S_SIGUSR1 ? "SIGUSR1" : "SIGUSR2");
 
 	if(sig_num == S_SIGUSR1)
 		s_usr1_counter ++;
 
 	else if(sig_num == S_SIGUSR2)
 		s_usr2_counter ++;
-
-	else
-		puts("what ? ");
-
 }
 
 //-------------------------------------
+//signal handler
 void catch_sigterm(int sig_num)
 {
 	signal(SIGTERM, catch_sigterm);
+
 	printf("Process %d win\n", getpid());
 	exit(EXIT_SUCCESS);
 }
@@ -79,27 +77,28 @@ void catch_sigterm(int sig_num)
 //-------------------------------------
 void do_child()
 {
-	process_action(getppid());
+	process_action(getppid(), 17); //send parent pid and num to srand
 }
 
 //-------------------------------------
 void do_parent(pid_t child_id)
 {
-		process_action(child_id);
+	process_action(child_id, 18); //send child pid and num to srand
 }
 
 //-------------------------------------
-void process_action(pid_t process_to_kill)
+void process_action(pid_t process_to_kill, int n_seed)
 {
 	int option, s_usr1, s_usr2;
 	s_usr1 = s_usr2 = 0;
 
-	srand(17);
 	while(1)
 	{
+		srand(n_seed);
+
+		sleep((rand() % 3)); //sleep for random amount of time
+
 		option = rand() % 3; //generate random number between 0 and 2
-		//lehagril num (max 2) to sleep
-		sleep(option); //pause for random amount of time
 
 		switch(option)
 		{
@@ -121,7 +120,7 @@ void process_action(pid_t process_to_kill)
 
 		if( s_usr1_counter == 5 || s_usr2_counter == 5)
 		{
-			printf("process %d surrender\n", getpid());
+			printf("Process %d surrender\n", getpid());
 			kill(process_to_kill, SIGTERM);
 			wait(NULL);
 			exit(EXIT_SUCCESS);

@@ -11,18 +11,21 @@
 
 
 //------------ inclide section ----------------
+
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
-#include<sys/wait.h> //for wait()
+#include <sys/wait.h> //for wait()
 #include <unistd.h> // for fork()
 #include <stdbool.h>
 #include <signal.h>
 
 //--------------- const section --------------
-const int NUM_OF_LOOPS = 100000;
+
+const int NUM_OF_PRIMES = 100000;
 
 //----------- prototype section --------------
+
 void catch_alarm(int sig_num);
 void catch_sigusr1(int sig_num);
 bool prime_num(int num);
@@ -31,6 +34,7 @@ void do_parent(pid_t status);
 void print_error_and_exit();
 
 //----------- global variables ---------------
+
 short time_elapsed;
 
 //-------------- main section ----------------
@@ -56,26 +60,25 @@ int main()
 }
 
 //--------------------------------------------
+//signal handler
 void catch_alarm(int sig_num)
 {
-	signal(SIGALRM, catch_alarm); //dont need this in linux im pretty sure but ok
+	signal(SIGALRM, catch_alarm);
  	time_elapsed = (time_elapsed == 1) ? 2 :  0;
-	// if(time_elapsed == 1) //does this change the global value for the child too??
-	// 	time_elapsed = 2;
-	// else
-	// 	time_elapsed = 0;
 }
 
 //--------------------------------------------
+//signal handler
 void catch_sigusr1(int sig_num)
 {
 	signal(SIGUSR1, catch_sigusr1);
 	printf("%d\n", time_elapsed);
-	wait(NULL); //does parent need to wait for child to end? will child be ok? babysitter? the answer is yes
+	wait(NULL);
 	exit(EXIT_SUCCESS);
 }
 
 //--------------------------------------------
+//get initger - return if prime or not
 bool prime_num(int num)
 {
 	int i;
@@ -84,24 +87,23 @@ bool prime_num(int num)
 		if(num % i == 0)
 			return false;
 	}
-
 	return true;
 }
 
 //--------------------------------------------
+//child process: find 'NUM_OF_PRIMES' primes
 void do_child()
 {
-	int num, //random num
-	 		num_of_primes = 0; //primes counter
-	srand(18);
+	int num, primes_counter = 0;
+	srand(17);
 
 	while(1)
 	{
-		num = rand();
+		num = rand(); //randomize num
 		if(prime_num(num))
-			num_of_primes++;
+			primes_counter++;
 
-		if (num_of_primes == NUM_OF_LOOPS)
+		if (primes_counter == NUM_OF_PRIMES)
 		{
 			kill(getppid(), SIGUSR1);
 			exit(EXIT_SUCCESS);
@@ -110,14 +112,16 @@ void do_child()
 }
 
 //--------------------------------------------
+// parent process: get child pid and check if child finished find NUM_OF_PRIMES
+// prints 0 if less then 1 second, 2 if less then 2 second if more so 0
 void do_parent(pid_t status)
 {
 	int i;
 	for(i = 0; i < 2; i++)
 	{
 		alarm(1);
-		pause();
-		//alarm(0); //???
+		pause(); // wait to sigalrm
+		alarm(0);
 	}
 	kill(status, SIGKILL);
 	printf("%d\n", time_elapsed);
@@ -129,101 +133,3 @@ void print_error_and_exit()
 	fputs("Unable to fork.\n", stderr);
 	exit(EXIT_FAILURE);
 }
-
-//============================================================================
-/*
-int main()
-{
-	pid_t status;
-	int num_of_primes = 0;
-	int i;
-	signal(SIGALRM, catch_alarm);
-	srand(17);
-	screensaver = 1;
-
-	status = fork();
-
-	if(status < 0)
-	{
-		fputs("error in fork", stderr);
-		exit(EXIT_FAILURE);
-	}
-
-	if (status == 0)
-	{
-
-		while(num_of_primes < NUM_OF_LOOPS)
-		{
-			num = rand();
-			if(prime_num(num))
-				num_of_primes++;
-		}
-
-		exit(EXIT_SUCCESS);
-	}
-
-	if(status > 0)
-	{
-		for(i = 0; i < 2; i++)
-		{
-			alarm(1);
-			pause();
-		}
-		kill(status, SIGKILL);
-		puts("%d", screensaver);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-void catch_alarm(int sig_num)
-{
-	(screensaver == 1) ? screensaver = 2 : screensaver = 0;
-}
-
-
-//============================================================================
-
-int main()
-{
-
-	pid_t status;
-	int num_of_primes = 0;
-	signal(SIGALRM, catch_alarm);
-	srand(17);
-
-	status = fork();
-
-	if(status < 0)
-	{
-		fputs("error in fork", stderr);
-		exit(EXIT_FAILURE);
-	}
-
-	if (status == 0)
-	{
-
-		while(num_of_primes < NUM_OF_LOOPS)
-		{
-			num = rand();
-			if(prime_num(num))
-				num_of_primes++;
-		}
-		exit(EXIT_SUCCESS);
-	}
-
-	if(status > 0)
-	{
-		alarm(2);
-		pause();
-		kill(status, SIGKILL);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-void catch_alarm(int sig_num)
-{
-	puts("%d", 0);
-}
-*/
