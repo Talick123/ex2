@@ -14,7 +14,9 @@
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
-#include <unistd.j> // for fork()
+#include<sys/wait.h> //for wait()
+#include <unistd.h> // for fork()
+#include <stdbool.h>
 #include <signal.h>
 
 //--------------- const section --------------
@@ -25,7 +27,7 @@ void catch_alarm(int sig_num);
 void catch_sigusr1(int sig_num);
 bool prime_num(int num);
 void do_child();
-void do_parent();
+void do_parent(pid_t status);
 void print_error_and_exit();
 
 //----------- global variables ---------------
@@ -48,7 +50,7 @@ int main()
 	if (status == 0) //child
 		do_child();
 	else //parent
-		do_parent();
+		do_parent(status);
 
 	return EXIT_SUCCESS;
 }
@@ -68,8 +70,8 @@ void catch_alarm(int sig_num)
 void catch_sigusr1(int sig_num)
 {
 	signal(SIGUSR1, catch_sigusr1);
-	puts("%d\n", time_elapsed);
-	wait(); //does parent need to wait for child to end? will child be ok? babysitter? the answer is yes
+	printf("%d\n", time_elapsed);
+	wait(NULL); //does parent need to wait for child to end? will child be ok? babysitter? the answer is yes
 	exit(EXIT_SUCCESS);
 }
 
@@ -77,7 +79,7 @@ void catch_sigusr1(int sig_num)
 bool prime_num(int num)
 {
 	int i;
-	for(i = 2, i*i < num; i++)
+	for(i = 2; i*i < num; i++)
 	{
 		if(num % i == 0)
 			return false;
@@ -108,8 +110,9 @@ void do_child()
 }
 
 //--------------------------------------------
-void do_parent()
+void do_parent(pid_t status)
 {
+	int i;
 	for(i = 0; i < 2; i++)
 	{
 		alarm(1);
@@ -117,7 +120,7 @@ void do_parent()
 		//alarm(0) //???
 	}
 	kill(status, SIGKILL);
-	puts("%d", time_elapsed);
+	printf("%d", time_elapsed);
 }
 
 //--------------------------------------------

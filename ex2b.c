@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
-#include <unistd.j> // for fork()
+#include <unistd.h> // for fork()
 #include <signal.h>
 
 //----------- prototype section --------------
@@ -10,7 +10,7 @@ void catch_sigusr(int sig_num);
 void catch_sigterm(int sig_num);
 void do_child();
 void do_parent(pid_t child_id);
-void action(p_id process_to_kill);
+void process_action(pid_t process_to_kill);
 void print_error_and_exit();
 
 //----------- global variables ---------------
@@ -45,9 +45,12 @@ void catch_sigusr(int sig_num)
 	signal(SIGUSR1, catch_sigusr);
 	signal(SIGUSR2, catch_sigusr);
 	//strsignal get sig_num return signal name
-	char *name = strsignal(sig_num); //not sure if its realy work
 
-	puts("Process %d got signal %s", getpid(), strsignal(sig_num));
+	// - TODO : change
+
+	//char *name = strsignal(sig_num); //not sure if its realy work
+/*
+	printf("Process %d got singal %", getpid(), strsignal(sig_num));
 
 	if(name == "SIGUSR1")
 	{
@@ -61,38 +64,40 @@ void catch_sigusr(int sig_num)
 	{
 		puts("what ? ");
 	}
+	*/
 }
 
 //-------------------------------------
 void catch_sigterm(int sig_num)
 {
 	signal(SIGTERM, catch_sigterm);
-	puts("Process %d win", getpid());
+	printf("Process %d win", getpid());
 	exit(EXIT_SUCCESS);
 }
 
 //-------------------------------------
 void do_child()
 {
-	action(getppid());
+	process_action(getppid());
 }
 
 //-------------------------------------
 void do_parent(pid_t child_id)
 {
-		action(child_id);
+		process_action(child_id);
 }
 
 //-------------------------------------
-void action( p_id process_to_kill)
+void process_action(pid_t process_to_kill)
 {
 	int option, s_usr1, s_usr2;
 	s_usr1 = s_usr2 = 0;
 
-	srand(17)
-	while(true)
+	srand(17);
+	while(1)
 	{
 		option = rand() % 3; //generate random number between 0 and 2
+		//lehagril num (max 2) to sleep
 		sleep(option); //pause for random amount of time
 
 		switch(option)
@@ -115,7 +120,7 @@ void action( p_id process_to_kill)
 
 		if( s_usr1_counter == 5 || s_usr2_counter == 5)
 		{
-			puts("process %d surrender", getpid());
+			printf("process %d surrender", getpid());
 			kill(process_to_kill, SIGTERM);
 			exit(EXIT_SUCCESS);
 		}
