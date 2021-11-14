@@ -1,12 +1,13 @@
 /*
-- parent creates child process
-- child runs in infinite loop
-	- in each loop: child magril number
-	- when he randomizes 100 thousand prime numbers, he stops
-	- numbers are not saved or presented
-- if the child process finishes in less than 1 second, the parent prints 1
-- if the child process finishes in more than 1 but less than 2, parent prints 2
-- if the child process finishes in more than 2, the parent prints 0
+
+	- parent creates child process
+	- child runs in infinite loop
+		- in each loop: child magril number
+		- when he randomizes 100 thousand prime numbers, he stops
+		- numbers are not saved or presented
+	- if the child process finishes in less than 1 second, the parent prints 1
+	- if the child process finishes in more than 1 but less than 2, parent prints 2
+	- if the child process finishes in more than 2, the parent prints 0
 */
 
 
@@ -117,10 +118,10 @@ void do_parent(pid_t status)
 	{
 		alarm(1);
 		pause();
-		//alarm(0) //???
+		alarm(0); //???
 	}
 	kill(status, SIGKILL);
-	printf("%d", time_elapsed);
+	printf("%d\n", time_elapsed);
 }
 
 //--------------------------------------------
