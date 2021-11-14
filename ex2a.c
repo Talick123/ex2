@@ -49,7 +49,7 @@ void catch_alarm(int sig_num)
 void catch_sigusr1(int sig_num)
 {
 	signal(SIGUSR1, catch_sigusr1);
-	puts("%d\n", screensaver);
+	puts("%d\n", time_elapsed);
 	wait(); //does parent need to wait for child to end? will child be ok? babysitter? the answer is yes
 	exit(EXIT_SUCCESS);
 }
