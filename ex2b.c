@@ -1,49 +1,69 @@
+//------------ inclide section ----------------
 #include <stdio.h>
 #include <stdlib.h> //for exit()
 #include <sys/types.h>
 #include <unistd.j> // for fork()
 #include <signal.h>
 
+//----------- prototype section --------------
+void catch_sigusr(int sig_num);
+void catch_sigterm(int sig_num);
+void do_child();
+void do_parent(pid_t child_id);
+void action(p_id process_to_kill);
+void print_error_and_exit();
 
+//----------- global variables ---------------
 
+int s_usr1_counter = 0, s_usr2_counter = 0;
+
+//------------- main section -----------------
 int main()
 {
 	pid_t status;
 
-	signal(SIGUSR1, catch_sigusr1);
-	signal(SIGUSR2, catch_sigusr2);
+	// signal handlers declaration
+	signal(SIGUSR1, catch_sigusr);
+	signal(SIGUSR2, catch_sigusr);
 	signal(SIGTERM, catch_sigterm);
 
-	status = fork();
+	status = fork(); //create child process
 
-	if(status < 0)
+	if(status < 0) //handle error in fork
 		print_error_and_exit();
-	if(status == 0)
+	if(status == 0) //child
 		do_child();
-	else
+	else //parent
 		do_parent(status);
 
 	return EXIT_SUCCESS;
 }
 
-void catch_sigusr1(int sig_num)
+//-------------------------------------
+void catch_sigusr(int sig_num)
 {
-	signal(SIGUSR1, catch_sigusr1);
-	puts("Process %d got singal SIGUSR1", getpid());
-	//counts the amount of time it received this signal
-	//if received 5 times, prints message, sends sigterm to other process and ends
+	signal(SIGUSR1, catch_sigusr);
+	signal(SIGUSR2, catch_sigusr);
+	//strsignal get sig_num return signal name
+	char *name = strsignal(sig_num); //not sure if its realy work
 
+	puts("Process %d got singal %s", getpid(), strsignal(sig_num));
+
+	if(name == "SIGUSR1")
+	{
+		s_usr1_counter ++;
+	}
+	else if(name == "SIGUSR1")
+	{
+		s_usr2_counter ++;
+	}
+	else
+	{
+		puts("what ? ");
+	}
 }
 
-void catch_sigusr2(int sig_num)
-{
-	signal(SIGUSR2, catch_sigusr2);
-	puts("Process %d got singal SIGUSR2", getpid());
-	//counts the amount of time it received this signal
-	//if received 5 times, prints message, sends sigterm to other process and ends
-	
-}
-
+//-------------------------------------
 void catch_sigterm(int sig_num)
 {
 	signal(SIGTERM, catch_sigterm);
@@ -51,46 +71,58 @@ void catch_sigterm(int sig_num)
 	exit(EXIT_SUCCESS);
 }
 
+//-------------------------------------
 void do_child()
 {
-	int option;
-	srand(18)
+	action(getppid());
+}
+
+//-------------------------------------
+void do_parent(pid_t child_id)
+{
+		action(child_id);
+}
+
+//-------------------------------------
+void action( p_id process_to_kill)
+{
+	int option, s_usr1, s_usr2;
+	s_usr1 = s_usr2 = 0;
+
+	srand(17)
 	while(true)
 	{
-		//pause for random amount of time
-		//generate random number between 0 and 2
-		option = rand() % 3;
-		
+		option = rand() % 3; //generate random number between 0 and 2
+		sleep(option); //pause for random amount of time
+
 		switch(option)
 		{
 		case 0:
 			exit (EXIT_SUCCESS);
 		case 1:
-			//send to sigusr1
-			//increase count of sending signal to sigusr1
-			//if counter at 7 - prints message and ends
-			kill(getppid(), SIGUSR1);
+			kill(process_to_kill, SIGUSR1);
+			s_usr1 ++ ;
 		case 2:
-			//send to sigusr2
-			//increase count of sending signal to sigusr2
-			//if counter at 7 - prints message and ends
-			kill(getppid(), SIGUSR2);
+			kill(process_to_kill, SIGUSR2);
+			s_usr2 ++ ;
+		}
+
+		if(s_usr1 == 7 || s_usr2 == 7)
+		{
+			puts("you probably ended");
+			exit(EXIT_SUCCESS);
+		}
+
+		if( s_usr1_counter == 5 || s_usr2_counter == 5)
+		{
+			puts("process %d surrender", getpid());
+			kill(process_to_kill, SIGTERM);
+			exit(EXIT_SUCCESS);
 		}
 	}
 }
 
-void do_parent(pid_t child_id)
-{
-	int option;
-	srand(17)
-	while(true)
-	{
-		//same as child
-	}
-
-}
-
-
+//-------------------------------------
 void print_error_and_exit()
 {
 	fputs("Unable to fork.\n", stderr);
