@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unistd.h> // for fork()
 #include <signal.h>
+#include<sys/wait.h> //for wait()
 
 //----------- prototype section --------------
 void catch_sigusr(int sig_num);
@@ -16,6 +17,10 @@ void print_error_and_exit();
 //----------- global variables ---------------
 
 int s_usr1_counter = 0, s_usr2_counter = 0;
+
+//------------- enum section -----------------
+
+enum SIGNALS { S_SIGUSR1 = 10, S_SIGUSR2 = 12 };
 
 //------------- main section -----------------
 int main()
@@ -49,29 +54,25 @@ void catch_sigusr(int sig_num)
 	// - TODO : change
 
 	//char *name = strsignal(sig_num); //not sure if its realy work
-/*
-	printf("Process %d got singal %", getpid(), strsignal(sig_num));
 
-	if(name == "SIGUSR1")
-	{
+	printf("Process %d got singal %s\n", getpid(), sig_num == S_SIGUSR1 ? "SIGUSR1" : "SIGUSR2");
+
+	if(sig_num == S_SIGUSR1)
 		s_usr1_counter ++;
-	}
-	else if(name == "SIGUSR1")
-	{
+
+	else if(sig_num == S_SIGUSR2)
 		s_usr2_counter ++;
-	}
+
 	else
-	{
 		puts("what ? ");
-	}
-	*/
+
 }
 
 //-------------------------------------
 void catch_sigterm(int sig_num)
 {
 	signal(SIGTERM, catch_sigterm);
-	printf("Process %d win", getpid());
+	printf("Process %d win\n", getpid());
 	exit(EXIT_SUCCESS);
 }
 
@@ -120,8 +121,9 @@ void process_action(pid_t process_to_kill)
 
 		if( s_usr1_counter == 5 || s_usr2_counter == 5)
 		{
-			printf("process %d surrender", getpid());
+			printf("process %d surrender\n", getpid());
 			kill(process_to_kill, SIGTERM);
+			wait(NULL);
 			exit(EXIT_SUCCESS);
 		}
 	}

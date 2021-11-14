@@ -1,5 +1,4 @@
 /*
-
 	- parent creates child process
 	- child runs in infinite loop
 		- in each loop: child magril number
@@ -118,7 +117,7 @@ void do_parent(pid_t status)
 	{
 		alarm(1);
 		pause();
-		alarm(0); //???
+		//alarm(0); //???
 	}
 	kill(status, SIGKILL);
 	printf("%d\n", time_elapsed);
